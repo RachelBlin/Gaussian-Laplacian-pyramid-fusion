@@ -23,6 +23,12 @@ def main_multimodal_fusion(im_vis, im_ir, kernel, levels, window_size):
     im_vis_hsv = rgb2hsv(im_vis)
     value_channel = im_vis_hsv[:, :, 2]
 
+    plt.subplot(1, 2, 1)
+    plt.imshow(value_channel, cmap='gray')
+    plt.subplot(1, 2, 2)
+    plt.imshow(im_ir, cmap='gray')
+    plt.show()
+
     # kernels to compute visibility
     kernel1 = classical_gaussian_kernel(5, 2)
     kernel2 = classical_gaussian_kernel(5, 2)
@@ -41,8 +47,28 @@ def main_multimodal_fusion(im_vis, im_ir, kernel, levels, window_size):
     # Combination of local entropy, local contrast and visibility for IR image
     weight_ir = weight_combination(local_entropy_ir, local_contrast_ir, visibility_ir, 1, 1, 1)
 
+    plt.subplot(2, 3, 1)
+    plt.imshow(local_entropy_value, cmap='gray')
+    plt.subplot(2, 3, 2)
+    plt.imshow(local_contrast_value, cmap='gray')
+    plt.subplot(2, 3, 3)
+    plt.imshow(visibility_value, cmap='gray')
+    plt.subplot(2, 3, 4)
+    plt.imshow(local_entropy_ir, cmap='gray')
+    plt.subplot(2, 3, 5)
+    plt.imshow(local_contrast_ir, cmap='gray')
+    plt.subplot(2, 3, 6)
+    plt.imshow(visibility_ir, cmap='gray')
+    plt.show()
+
     # Normalising weights of value channel and IR image
     weightN_value, weightN_ir = weight_normalization(weight_value, weight_ir)
+
+    plt.subplot(1, 2, 1)
+    plt.imshow(weightN_value, cmap='gray')
+    plt.subplot(1, 2, 2)
+    plt.imshow(weightN_ir, cmap='gray')
+    plt.show()
 
     # Creating Gaussian pyramids of the weights maps of respectively the value channel and IR image
     gauss_pyr_value_weights = gaussian_pyramid(weightN_value, kernel, levels)
@@ -54,6 +80,13 @@ def main_multimodal_fusion(im_vis, im_ir, kernel, levels, window_size):
 
     # Creating the fused Laplacian of the two modalities
     lap_pyr_fusion = fused_laplacian_pyramid(gauss_pyr_value_weights, gauss_pyr_ir_weights, lap_pyr_value, lap_pyr_ir)
+
+    i = 1
+    for l in lap_pyr_fusion:
+        plt.subplot(1, len(lap_pyr_fusion), i)
+        plt.imshow(l, cmap='gray')
+        i += 1
+    plt.show()
 
     # Creating the Gaussian pyramid of value channel in order to collapse the fused Laplacian pyramid
     gauss_pyr_value = gaussian_pyramid(value_channel, kernel, levels)
